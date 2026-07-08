@@ -1,0 +1,20 @@
+nnsight>=0.5.0
+jupyterlab
+python-dotenv
+
+# LLMSymbMech Dependencies
+# transformers==4.46.3    # ImportError
+transformers>=4.47.0
+# transformer-lens==2.13.0    # ERROR: Could not find a version that satisfies the requirement torch<2.5
+transformer-lens
+torch
+numpy
+pandas
+scikit-learn
+matplotlib
+datasets
+pyrootutils
+tqdm
+statsmodels
+seaborn
+sentencepiece

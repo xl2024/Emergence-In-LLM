@@ -1,4 +1,3 @@
 [submodule "reference/LLMSymbMech"]
 	path = reference/LLMSymbMech
 	url = https://github.com/yukang123/LLMSymbMech.git
-	ignore = dirty

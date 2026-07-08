@@ -22,6 +22,7 @@ model_weights/
 .cache/
 huggingface/
 .huggingface_cache/
+hf_home/
 
 # --- IDEs & OS Files ---
 .vscode/
