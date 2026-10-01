@@ -1,0 +1,1 @@
+symbol_abstraction_head (2): 0.1492810994386673

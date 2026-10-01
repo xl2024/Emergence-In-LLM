@@ -1,0 +1,4 @@
+model type: gpt2-large; rule: ABB
+# in-context example: 8; # prompt: 500; # sample per prompt: 4; seed: 0
+<accuracy> average: 0.8315; std: 0.3365007429412304; binom_conf: (0.8144633695065567, 0.8472656281459726); set: {0.5, 1.0, 0.25, 0.0, 0.75}
+

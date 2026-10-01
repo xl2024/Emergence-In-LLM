@@ -1,0 +1,4 @@
+model type: Llama-3.1-70B; rule: ABB
+# in-context example: 8; # prompt: 500; # sample per prompt: 4; seed: 0
+<accuracy> average: 0.986; std: 0.11092339699089637; binom_conf: (0.9798404131888422, 0.9902962168537798); set: {0.0, 1.0, 0.25, 0.75}
+

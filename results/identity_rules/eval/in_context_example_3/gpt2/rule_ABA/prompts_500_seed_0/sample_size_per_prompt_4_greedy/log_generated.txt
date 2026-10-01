@@ -1,0 +1,4 @@
+model type: gpt2; rule: ABA
+# in-context example: 3; # prompt: 500; # sample per prompt: 4; seed: 0
+<accuracy> average: 0.2385; std: 0.34855810132602; binom_conf: (0.22033526587761323, 0.257667349850482); set: {0.0, 0.75, 0.25, 0.5, 1.0}
+

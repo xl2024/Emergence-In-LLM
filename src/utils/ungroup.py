@@ -242,7 +242,7 @@ def check_remote_layer_kv_metadata(
     _, num_kv_heads = _resolve_text_model_dims(model, kv_heads=True)
     layer_paths = get_layer_paths(model, ["k", "v"]) if ungroup_grouped_query_attention else None
     
-    if num_heads == num_kv_heads:
+    if num_heads == num_kv_heads or not ungroup_grouped_query_attention:
         return
     if "k" not in layer_paths[layer_idx]:
         return

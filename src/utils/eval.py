@@ -121,6 +121,23 @@ def main(args):
         for p in correct_generation_prompt:
             f.write(f"{LINE_SEP}" + p + "\n")
 
+    sum_path = os.path.join("outputs", "eval", "sum_dict.pt")
+    if os.path.exists(sum_path):
+        sum_dict = torch.load(sum_path, map_location="cpu", weights_only=False)
+    else:
+        sum_dict = {}
+    if args.model_type not in sum_dict:
+        sum_dict[args.model_type] = {}
+    if args.rule not in sum_dict[args.model_type]:
+        sum_dict[args.model_type][args.rule] = {}
+    sum_dict[args.model_type][args.rule][args.in_context_example_num] = {
+        "acc_list": acc_list,
+        "correct_num": correct_num,
+        "total_num": total_num
+    }
+    torch.save(sum_dict, sum_path)
+
+
 if __name__ == "__main__":
     args = get_args()
     main(args)

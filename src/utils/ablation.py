@@ -12,7 +12,7 @@ import logging
 logger: logging.Logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-from src.utils.utils import LINE_SEP, plot, HEAD_ACTIVATIONS, set_seed, vocab_dict, get_model_id_family
+from src.utils.utils import LINE_SEP, plot, HEAD_ACTIVATIONS, avg_head_dict, set_seed, vocab_dict, get_model_id_family, get_prompts_for_cma
 from src.utils.args import _get_args
 from src.utils.tools import generate_prompts, _resolve_layer_path, get_num_hidden_layers, _resolve_text_model_dims, generate_response_eval, get_layer_paths, has_prepend_bos, get_eos_token_id, get_token_sets, get_generation_kwargs
 from src.utils.ungroup import check_remote_kv_metadata
@@ -36,17 +36,11 @@ ndif.register("src.utils.ungroup")
 # Prompt-position causal effect: mask only when the full prompt positions exist; skip decode steps (what the paper did)
 ONLY_PREFILL = True
 
-def get_head_list(head_type):
-
+def get_head_list(model_type, head_type, score_dict=avg_head_dict):
     ## Load the causal mediation scores of each attention head for a specified head type 
-    score_dict = {
-        "symbol_abstraction_head": "datasets/cma_scores/llama31_70B/symbol_abstraction_head/causal_scores.pt",  #f"causal_mediation_results_full/meta-llama/Llama-3.1-70B_ungroup_gqa/exp_swap_1_2_change_rule_swap_1_2_question/base_rule_AVG/z_seed{tag}/logit/sample_num_20_0.0/group_heads_False/token_pos_[5, 11]/logits_diff_ch_avg_ABA_ABB_mean.pt",
-        "symbolic_induction_head": "datasets/cma_scores/llama31_70B/symbolic_induction_head/causal_scores.pt", #f"causal_mediation_results_full/meta-llama/Llama-3.1-70B_ungroup_gqa/exp_swap_1_2_change_rule_swap_1_2_question/base_rule_AVG/z_seed{tag}/logit/sample_num_20_0.0/group_heads_False/token_pos_[-1]/logits_diff_ch_avg_ABA_ABB_mean.pt",
-        "retrieval_head": "datasets/cma_scores/llama31_70B/retrieval_head/causal_scores.pt" #f"causal_mediation_results_full/meta-llama/Llama-3.1-70B_ungroup_gqa/exp_swap_1_2_question/base_rule_AVG/z_seed{tag}/logit/sample_num_20_0.0/group_heads_False/token_pos_[-1]/logits_diff_ch_avg_ABA_ABB_mean.pt"
-    }
-
-    file = score_dict[head_type]
-    avg_score = torch.load(file, map_location="cpu", weights_only=True).cpu().numpy()
+    file = score_dict[model_type][head_type]
+    avg_score = torch.load(file, map_location="cpu", weights_only=True)
+    avg_score = avg_score.mean(dim=0).cpu().numpy()
 
     n_layers = avg_score.shape[0]
     n_heads = avg_score.shape[1]
@@ -297,7 +291,7 @@ def cumulative_ablation(
     if patch_all_token_pos:
         token_pos_tag = f"token_pos_all" 
     
-    ablation_type = f"control_{control}_random_control_{random_control}_{random_times_per_step}"
+    ablation_type = f"ctrl_{control}_randctrl_{random_control}_{random_times_per_step}"    # filename too long
 
     checkpoint_dir = os.path.join(save_folder, head_type, "checkpoints", ablation_type, token_pos_tag)
     os.makedirs(checkpoint_dir, exist_ok=True)
@@ -425,7 +419,7 @@ def plot_curve(metric_list, top_num_list, save_folder, metric_name):
     plt.ylabel(metric_name)
     plt.title(f"Effect of Top-K Heads on {metric_name}")
     os.makedirs(save_folder, exist_ok=True)
-    save_path = os.path.join(save_folder, f"{metric_name}_vs_top_k_heads.png")
+    save_path = os.path.join(save_folder, f"{metric_name}_topk.png")
     plt.savefig(save_path)
     logger.info(f"fig saved to {save_path}")
 
@@ -473,7 +467,7 @@ def main(args):
     activation_name = args.activation_name
     layer_paths = get_layer_paths(model, [activation_name])
     ## create the result folder
-    remark = f"{model_id}{model_remark}/rule_{args.rule}/{activation_name}_seed_{args.seed}_shuffle_{args.do_shuffle}"
+    remark = f"{model_id}{model_remark}/rule_{args.rule}/{activation_name}_seed_{args.seed}_shuffle_{args.do_shuffle}_ONLY_PREFILL_{ONLY_PREFILL}"
     save_folder = os.path.join(args.log_dir, remark)
     os.makedirs(save_folder, exist_ok=True)
     logger.info(f"save_folder: {save_folder}")
@@ -507,21 +501,22 @@ def main(args):
     
     ## load the prompts which were used for calculating the causal scores, these prompts will not be used for ablation
     if args.prompt_file_for_causal_scores_exp is not None:
-        with open(args.prompt_file_for_causal_scores_exp, "r") as f:
-            lines = f.read()
-            lines = lines.split(LINE_SEP)   
-
-            assert lines[0] == ""
-            lines = lines[1:] 
-        prompt_for_causal_scores = [line.strip() for line in lines]
+        prompt_file_for_cma = args.prompt_file_for_causal_scores_exp
     else:
-        prompt_for_causal_scores = None
+        prompt_file_for_cma = get_prompts_for_cma(args.model_type, args.head_type, args.rule)
+    with open(prompt_file_for_cma, "r") as f:
+        lines = f.read()
+        lines = lines.split(LINE_SEP)   
+
+        assert lines[0] == ""
+        lines = lines[1:] 
+    prompt_for_causal_scores = [line.strip() for line in lines]
 
     #################################################################
     #### 2. Get the head list ranked by the causal mediation scores ####
     #################################################################
 
-    ranked_head_list, layer_rank_head_dict  = get_head_list(args.head_type)
+    ranked_head_list, layer_rank_head_dict  = get_head_list(args.model_type, args.head_type)
 
 
     ##################################################################

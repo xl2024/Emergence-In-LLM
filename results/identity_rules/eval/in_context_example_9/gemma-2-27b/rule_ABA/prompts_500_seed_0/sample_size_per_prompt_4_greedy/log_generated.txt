@@ -1,0 +1,4 @@
+model type: gemma-2-27b; rule: ABA
+# in-context example: 9; # prompt: 500; # sample per prompt: 4; seed: 0
+<accuracy> average: 0.996; std: 0.063118935352238; binom_conf: (0.9921265357039621, 0.9979717533930348); set: {0.0, 1.0}
+

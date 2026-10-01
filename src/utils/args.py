@@ -19,7 +19,7 @@ def _get_args(type_str: str):
         parser.add_argument("--base_rule", type=str, default="ABA", help="base rule")
         parser.add_argument("--in_context_example_num", type=int, default=2, help="in-context example number")
         parser.add_argument(
-            "--token_set_file", type=str, default="datasets/llama31_70B_correct_common_tokens_0.9_1378.txt", #None, 
+            "--token_set_file", type=str, default=None, # "datasets/llama31_70B_correct_common_tokens_0.9_1378.txt" 
             help="the file contains token sets that formed sequences of rules ABA and ABB, with the model predicting both correctly, each line is a set of (2*N) tokens separated by space, 'A_1 B_1 ... A_N B_N', e.g., 'la li te to hi ha' (N-1) in-context examples."
         )
         parser.add_argument("--add_swap_1_2_question", action="store_true")
@@ -132,7 +132,7 @@ def _get_args(type_str: str):
         parser.add_argument("--sep_symbol", type=str, default="^", help="separator symbol")
         parser.add_argument("--do_shuffle", action="store_true")
         parser.add_argument(
-            "--token_set_file", type=str, default="datasets/llama31_70B_correct_common_tokens_0.9_1378.txt", #None, 
+            "--token_set_file", type=str, default=None, # "datasets/llama31_70B_correct_common_tokens_0.9_1378.txt", 
             help="the file of token sets which form sequences of rules ABA and ABB on which the model could make correct predictions, each line is a set of (2*N) tokens separated by space, 'A_1 B_1 ... A_N B_N', e.g., 'la li te to hi ha' (N-1) in-context examples."
         )
         

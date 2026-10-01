@@ -10,7 +10,6 @@ dist/
 *.egg-info/
 
 # --- Model Weights & Large Data ---
-# Never upload weights; they should be pulled from HF Hub or D: drive
 *.pt
 *.pth
 *.bin
@@ -35,3 +34,11 @@ Thumbs.db
 
 # Others
 .temp
+temp.py
+_loader.py
+setup*
+runner*
+run.ps1
+
+# pending runs
+results/identity_rules/eval/cma/

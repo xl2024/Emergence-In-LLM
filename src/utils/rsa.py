@@ -12,7 +12,7 @@ import logging
 logger: logging.Logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-from src.utils.utils import LINE_SEP, plot, set_seed, vocab_dict, get_model_id_family, get_head_list
+from src.utils.utils import LINE_SEP, plot, set_seed, vocab_dict, get_model_id_family, rsa_get_head_list
 from src.utils.args import _get_args
 from src.utils.tools import generate_prompts, _resolve_text_model_dims, _resolve_layer_path, get_num_hidden_layers, get_layer_paths, has_prepend_bos, get_token_sets
 
@@ -187,7 +187,7 @@ def main(args):
         return
 
     if args.only_for_significant_heads:
-        head_list, head_weight_score = get_head_list(args.head_type)
+        head_list, head_weight_score = rsa_get_head_list(args.model_type, args.head_type)
         weighted_avg_sim = None
         weighted_rsa_corr = 0
         weighted_sum = 0
@@ -203,10 +203,11 @@ def main(args):
         all_act_dict["ABB"][act] = torch.stack(all_act_dict["ABB"][act], dim=0) 
         logger.info(f"Aggregate activations for {act} ABA: {all_act_dict['ABA'][act].shape} ABB: {all_act_dict['ABB'][act].shape}")
         assert args.cmp_with_abstract or args.cmp_with_token_id 
+        all_act = torch.concat([all_act_dict["ABA"][act], all_act_dict["ABB"][act]], dim=0).float()
+        seq_len = all_act.shape[1]
         sel_pos_list = args.sel_pos_list
         if prepend_bos:
-            sel_pos_list = [pos + 1 if pos != -1 else pos for pos in sel_pos_list]
-        all_act = torch.concat([all_act_dict["ABA"][act], all_act_dict["ABB"][act]], dim=0).float()
+            sel_pos_list = [pos + 1 if pos != -1 else seq_len-1 for pos in sel_pos_list]
         # relative position for each item in the in-context example
         # pos_table = {   
         #     i_: 1 for i_ in range(1, all_act.shape[1], 6)
@@ -225,7 +226,6 @@ def main(args):
         logger.info("Getting Expected Similarity Matrix Based on Abstract Variables or Literal Tokens...")
         ### table of abstract variables for each token in the sequences of rules ABA and ABB
         ## 1: A; 2: B
-        seq_len = all_act.shape[1]
         logger.info(f"all_act.shape: {all_act.shape}, seq_len: {seq_len}")
         abs_table = {   
             i_: 1 for i_ in range(1, seq_len, 6)

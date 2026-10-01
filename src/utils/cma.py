@@ -604,6 +604,8 @@ def main(args):
     activation_name = args.activation_name
     causal_remark = f"{args.context_type}_context"
     remark = f"{model_id}{model_remark}/{causal_remark}/base_rule_{args.base_rule}_exp_rule_{exp_rule}/{activation_name}_seed_{args.seed}_shuffle_{args.do_shuffle}"
+    if args.token_pos_list != [-1]:
+        remark += "_pos_"+'_'.join([str(p) for p in args.token_pos_list])
     save_folder = os.path.join(args.log_dir, remark)
     logger.info(f"save_folder: {save_folder}")
     os.makedirs(save_folder, exist_ok=True)

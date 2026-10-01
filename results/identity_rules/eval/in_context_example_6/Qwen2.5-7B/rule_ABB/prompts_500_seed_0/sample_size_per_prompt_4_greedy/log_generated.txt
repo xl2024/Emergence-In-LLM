@@ -1,0 +1,4 @@
+model type: Qwen2.5-7B; rule: ABB
+# in-context example: 6; # prompt: 500; # sample per prompt: 4; seed: 0
+<accuracy> average: 0.99; std: 0.08888194417315588; binom_conf: (0.9846040615409247, 0.9935172321234472); set: {0.0, 1.0, 0.25, 0.5, 0.75}
+
