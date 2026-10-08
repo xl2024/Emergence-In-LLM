@@ -58,9 +58,14 @@ if __name__ == "__main__":
     seed = 1000
     ablation_dict = {
         "Llama-3.1-8B": {
-            "Ablation": "control_False_random_control_False_10",
-            "Control": "control_True_random_control_False_10",
-            "Random": "control_False_random_control_True_5"
+            "Ablation": "ctrl_False_randctrl_False_10",
+            "Control": "ctrl_True_randctrl_False_10",
+            "Random": "ctrl_False_randctrl_True_5"
+        }, 
+        "Llama-3.1-70B": {
+            "Ablation": "ctrl_False_randctrl_False_10",
+            "Control": "ctrl_True_randctrl_False_10",
+            "Random": "ctrl_False_randctrl_True_5"
         }
     }
     token_pos = {
@@ -68,7 +73,7 @@ if __name__ == "__main__":
         "symbolic_induction_head": [-1],
         "retrieval_head": [-1]
     }
-    for model_type in ["Llama-3.1-8B"]:
+    for model_type in ["Llama-3.1-8B", "Llama-3.1-70B"]:
         for head_type in ["symbol_abstraction_head", "symbolic_induction_head", "retrieval_head"]:
             for rule in ["ABA", "ABB"]:
                 for ONLY_PREFILL in [True]:
